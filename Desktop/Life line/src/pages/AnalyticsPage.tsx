@@ -93,8 +93,17 @@ export const AnalyticsPage: React.FC = () => {
   const bestSellers = useMemo(() => {
     const items: Record<string, number> = {};
     sales.forEach(s => {
-      if (Array.isArray(s.items)) {
-        s.items.forEach((item: any) => {
+      let safeItems = Array.isArray(s.items) ? s.items : [];
+      if (typeof s.items === 'string') {
+        try {
+          safeItems = JSON.parse(s.items);
+        } catch (e) {
+          console.error('Failed to parse sales items for analytics:', e);
+        }
+      }
+
+      if (Array.isArray(safeItems)) {
+        safeItems.forEach((item: any) => {
           items[item.name] = (items[item.name] || 0) + (item.quantity || 0);
         });
       }
